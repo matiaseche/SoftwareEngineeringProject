@@ -1,0 +1,31 @@
+<h1>Mis publicaciones favoritas</h1>
+
+
+<% if @user.followees(ForumPost).any? %>
+  <ul>
+    <% @user.followees(ForumPost).each do |forum_post| %>
+      <div class="row">
+        <p>
+          <strong><%= link_to forum_post.title, forum_thread_forum_post_path(forum_post.forum_thread, forum_post) %></strong>
+        </p>
+
+        <small>
+            Creado por <strong><%= forum_post.forum_thread.user.username %></strong>. <%= forum_post.forum_thread.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>
+        </small>
+
+      <div>
+        <% if user_signed_in? %>
+          <% if current_user.follows?(forum_post) %>
+              <small><%= link_to 'Sacar de mis favoritas', forum_thread_forum_post_sacar_favoritos_path(forum_post.forum_thread, forum_post) %></small>
+            <% end %>
+          <%end%>
+      </div>
+
+    <% end %>
+  </ul>
+
+<% else %>
+  <p>
+    No tienes publicaciones favoritas.
+  </p>
+<% end %>  

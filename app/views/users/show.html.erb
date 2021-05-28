@@ -1,0 +1,65 @@
+<h3>Perfil</h3>
+
+
+<p class="round-image-100"><%= image_tag(current_user.avatar.url(:thumb)) %></p>
+<p>Usuario: <strong><%= @user.username %></strong></p>
+<p>Correo: <strong><%= @user.email %></strong></p>
+<p>Nombre: <strong><%= @user.first_name %> <%= @user.last_name %></strong></p>
+
+
+
+
+<% rep = 0 %>
+<% ForumPost.where(user_id: @user.id).each do |post| %>
+	<% rep += post.get_likes.size %>
+	<% rep -= post.get_dislikes.size %>
+
+<% end %>
+
+
+<p>Reputación: <strong><%= rep %></strong></p>
+	
+<br>
+
+<% if current_user.id == @user.id %>
+	<%= link_to "Editar Perfil", edit_user_registration_url %>
+<% end %>
+
+<% if @user.admin %>
+	<p>Eres admin</p>
+	<h3>Usuarios Registrados</h3>
+	<% User.all.each do |user| %>
+		<% if user.id != @user.id %>
+			<p> <%=user.username%> </p>
+			<%= link_to "Destroy", user_destroy_path(user), data: { confirm: "You sure?" } %>
+		<%end%>
+	<% end %>
+
+	<h4>Solicitudes moderador</h4>
+	<ul>
+	<% Request.where(state: "Pendiente").each do |request| %>
+		<% user = User.find(request.user_id) %>
+		<% forum = ForumThread.find(request.forum_thread_id) %>
+		<li><strong><%= user.username %></strong> ha postulado al foro <strong><%= forum.subject %></strong> | <%= link_to 'Aceptar', forum_thread_request_aceptar_path(forum.id, request.id) %> | <%= link_to 'Rechazar', forum_thread_request_rechazar_path(forum.id, request.id) %>
+	<% end %>	
+	</ul>
+	<%= link_to "Estadísticas", estadisticas_path %>
+
+
+<% end %>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>

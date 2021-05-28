@@ -1,0 +1,150 @@
+<h1>Foros</h1>
+<p class="navbar-text pull-left">
+  <% if user_signed_in? %>
+    <h3>Notificaciones</h3><small>Última conexión: (<%= current_user.last_sign_in_at.strftime('%a, %d %b %Y %H:%M:%S') %>)</small>
+    <div class="notifications">
+      <ul>
+        <% if current_user.followees(ForumThread).any? %>
+          <% current_user.followees(ForumThread).each do |forum| %>
+            <% forum.forum_posts.each do |post| %>
+              <% if post.created_at > current_user.last_sign_in_at %>
+                <li>Nueva Publicación en <%= forum.subject %>, <%= link_to 'Ver', forum_thread_forum_post_path(forum, post)%></li>
+              <% elsif post.updated_at > current_user.last_sign_in_at %>
+                <li>Publicación actualizada en <%= link_to forum.subject, forum_thread_path(forum) %>, <%= link_to 'Ver', forum_thread_forum_post_path(forum, post)%></li>
+              <% end %>
+              <% post.comments.each do |comment| %>
+                <% if comment.created_at > current_user.last_sign_in_at %>
+                  <li>Nuevo comentario en <%= link_to post.title, forum_thread_forum_post_path(forum, post)%></li>
+                <% elsif comment.updated_at > current_user.last_sign_in_at %>
+                  <li>Comentario actualizado en <%= link_to post.title, forum_thread_forum_post_path(forum, post)%></li>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      </ul>
+    </div>
+    <%= link_to 'Crear Nuevo Foro', new_forum_thread_path %>
+  <% else %>
+    Para crear un foro debe iniciar sesión.
+  <% end %>
+</p>
+
+<div class="row">
+  <div class="column">
+    <h2>Recientes</h2><p><small>Los últimos 5 creados...</small></p>
+      <% if ForumThread.any? %>
+        <ul>
+          <% ForumThread.order("created_at DESC").limit(5).each do |forum_thread| %>
+            <p>
+              <div>
+                <strong><%= link_to forum_thread.subject, forum_thread %></strong>
+              </div>
+              <div>
+                <small>
+                  Created by <strong><%= forum_thread.user.username %></strong> at <%= forum_thread.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>
+                </small>
+                &emsp;<strong>Publicaciones: <%= forum_thread.forum_posts.count %></strong>
+              </div>
+              <div>
+                <% if user_signed_in? %>
+                  <% if not current_user.follows?(forum_thread) %>
+                    <%= link_to 'Seguir', follows_path(forum_thread) %>
+                  <% end %>
+                <% end %>
+              </div>
+            </p>
+          <% end %>
+        </ul>
+      <% else %>
+        <p>No hay resultados...</p>
+      <% end %>
+  </div>
+
+  <div class="column">
+    <h2>Todos</h2>
+    <strong>Búsqueda</strong>
+    <%= search_form_for @q, html: { class: "form-inline" } do |f| %>
+      <%= f.search_field :subject_cont, placeholder: "Buscar foro...", class: "form-control" %>
+    <%end%>
+    <% if @forum_threads.any? %>
+      <ul>
+        <% @forum_threads.each do |forum_thread| %>
+          <div class="row">
+            <p>
+              <div>
+                <strong><%= link_to forum_thread.subject, forum_thread %></strong>
+              </div>
+
+              <div>
+                <% if can? :destroy, forum_thread %>
+                  <td><%= link_to 'Eliminar', forum_thread, method: :delete, data: { confirm: '¿Estas seguro?' } %></td>
+                <% end %>
+              </div>
+
+              <div>
+                <small>
+                  Created by <strong><%= forum_thread.user.username %></strong> at <%= forum_thread.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>
+                </small>
+                &emsp;<strong>Publicaciones: <%= forum_thread.forum_posts.count %></strong>
+              </div> 
+
+              <div>
+                <% if user_signed_in? %>
+                  <% if not current_user.follows?(forum_thread) %>
+                    <%= link_to 'Seguir', follows_path(forum_thread) %>
+                  <% end %>
+                <%end%>
+              </div>
+
+            </p>
+          </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>No hay resultados...</p>
+    <% end %>
+  </div>
+
+  <div class="column">
+    <h2>Populares</h2>
+    <% if ForumThread.any? %>
+      <% mas_populares.keys.each do |popular| %>
+        <p><strong><%= link_to popular.subject, popular %></strong></p>
+        <div>
+          <small>
+            Created by <strong><%= popular.user.username %></strong> at <%= popular.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>
+          </small>
+          <small><strong>Popularidad: <%= mas_populares[popular] %></strong></small>
+          &emsp;<strong>Publicaciones: <%= popular.forum_posts.count %></strong>
+        </div>
+      <% end %>
+    <% else %>
+      <p>No hay resultados...</p>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  .column {
+    float: left;
+    width: 33.33%;
+    padding: 15px;
+  }
+
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+</style>

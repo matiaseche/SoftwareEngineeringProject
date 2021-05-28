@@ -1,0 +1,6 @@
+<h1>Editar Publicación</h1>
+
+<%= render 'form', forum_post: @forum_post %>
+
+<%= link_to 'Mostrar Publicación', [@forum_post.forum_thread, @forum_post]%> |
+<%= link_to 'Volver Atrás', forum_thread_forum_posts_path(@forum_post.forum_thread) %>

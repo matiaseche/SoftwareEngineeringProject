@@ -1,0 +1,42 @@
+<%= form_for([@forum_thread, poll]) do |form| %>
+  <% if poll.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(poll.errors.count, "error") %> prohibited this poll from being saved:</h2>
+
+      <ul>
+      <% poll.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :Pregunta %>
+    <%= form.text_field :question, id: :poll_question %>
+  </div>
+
+  <div class="field">
+    Respuestas:
+    <ul>
+      <%= form.fields_for :answers do |a| %>
+        <li>
+          <%= a.label :answer %>
+          <%= a.text_field :content %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+<!--   <% submit_tag 'Añadir Respuesta', type: :button, id: 'addAnswer', onclick: 'addAnswerField()' %>
+  <div id="answerHeader" style="display:none"> 
+      Respuestas: 
+    </div>
+    <br />
+    <ul id="myList">
+    </ul> -->
+
+  <div class="actions">
+    <%= form.submit "Crear Encuesta" %>
+  </div>
+<% end %>

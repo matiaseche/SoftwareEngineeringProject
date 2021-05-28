@@ -1,0 +1,24 @@
+<% if ya_postulo(current_user.id, @forum_thread.id) %>
+  <% request = Request.all.where(user_id: current_user.id, forum_thread_id: @forum_thread.id).last %>
+  <% if request.state == "Aceptado" %>
+    <strong><p>Felicitaciones, eres moderador !</p></strong>
+    <% modera = true %>
+  <% end %>
+<% end %>
+
+<p><%= comment.content %> 
+	<br>
+		<small> Creado por <strong><%= comment.user.username %>. </strong> <%= comment.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>. </small><strong><%= comment.get_likes.size %> Me Gusta.  </strong><strong><%= comment.get_dislikes.size %> No me Gusta.  </strong>
+		<% if (can? :destroy, comment) or modera %>
+			<%= link_to 'Borrar', forum_thread_forum_post_comment_path(comment.forum_post.forum_thread, comment.forum_post, comment), method: :delete %>
+		<% end %>
+
+		<%if user_signed_in? %>
+        	<% if not current_user.voted_for? comment and current_user.id != comment.user_id %>
+        		<%= link_to "Me gusta", forum_thread_forum_post_comment_likes_path(comment.forum_post.forum_thread, comment.forum_post, comment) %>
+
+        		<%= link_to "No me gusta", forum_thread_forum_post_comment_dislikes_path(comment.forum_post.forum_thread, comment.forum_post, comment) %>
+
+        	<%end%>
+        <%end%>
+</p>

@@ -1,0 +1,126 @@
+<h1><%= @forum_thread.subject %></h1>
+
+<% if user_signed_in? %>
+  <% rep = 0 %>
+  <% @forum_thread.forum_posts.where(user_id: current_user.id).each do |post| %>
+    <% rep += post.get_likes.size %>
+    <% rep -= post.get_dislikes.size %>
+  <% end %>
+  <p>Reputación en este foro: <%= rep %></p>
+  <% if rep > 0 and not ya_postulo(current_user.id, @forum_thread.id) %>
+    <p><strong>
+      Tu reputacion es muy alta, ¿quieres ser moderador? <%= button_to 'Postular', {controller: "requests", action: :create, user_id: current_user.id, forum_thread_id: @forum_thread.id}, method: :post %>
+    </strong></p>
+  <% elsif ya_postulo(current_user.id, @forum_thread.id) %>
+    <% request = Request.all.where(user_id: current_user.id, forum_thread_id: @forum_thread.id).last %>
+    <% if request.state == "Pendiente" %>
+      <strong><p>Ya has postulado a moderador!! Estado: <%= request.state %></p></strong>
+    <% elsif request.state == "Aceptado" %>
+      <strong><p>Felicitaciones, eres moderador !</p></strong>
+      <% modera = true %>
+    <% elsif request.state == "Rechazado" %>
+      <strong><p>Tu solicitud para ser moderador ha sido rechazada, puedes volver a intentarlo!</p></strong>
+      <% request.destroy %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% if user_signed_in? %>
+  <% if current_user.follows?(@forum_thread) or current_user.id == @forum_thread.user_id %>
+    <%= link_to 'Nueva publicación', new_forum_thread_forum_post_path(@forum_thread) %> | 
+    <%= link_to 'Nueva encuesta', new_forum_thread_poll_path(@forum_thread) %> | 
+  <% else %>
+    <div style="border: 1px solid black; background-color: lightgray;">
+      <p>
+        Para poder publicar debes seguir el foro!
+        <%= link_to 'Seguir', follows_path(@forum_thread) %>
+      </p>
+    </div>
+  <%end%>
+<% else %>
+  <div style="border: 1px solid black; background-color: lightgray;">
+    <p>
+      Inicia sesion o registrate para participar!
+    </p>
+  </div>
+<%end%>
+<%= link_to 'Volver Atrás', forum_threads_path %>
+<br>
+<br>
+
+<%= search_form_for @q, url: forum_thread_forum_posts_path(@forum_thread), html: { class: "form-inline" } do |f| %>
+  <%= f.search_field :title_or_body_cont, placeholder: "Buscar publicacion...", class: "form-control" %>
+<%end%>
+
+
+
+<p> Hay <%= @forum_posts.count %> publicaciones y <% @forum_thread.polls.count %> encuestas.</p>
+<% @forum_posts.each do |forum_post| %>
+  <div style="border-bottom: 1px solid black; background-color:#0000;">
+    <h3><%= forum_post.title %></h3>
+    <small>Creado por <strong><%= forum_post.user.username %></strong>. <%= forum_post.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>. <strong><%= forum_post.get_likes.size %> Me Gusta.  </strong><strong><%= forum_post.get_dislikes.size %> No me Gusta.  </strong>
+    </small>
+
+    <br>
+    <p>
+      <%= forum_post.body.html_safe %>
+    </p>
+    <% if can? :update, forum_post %>
+      <%= link_to 'Editar', [:edit, @forum_thread, forum_post] %> |
+    <% end %>
+    <% if (can? :destroy, forum_post) or modera %>
+      <%= link_to 'Eliminar', forum_thread_forum_post_path(forum_post.forum_thread, forum_post), method: :delete, data: { confirm: '¿Estás seguro que quieres eliminar la publicación?' } %>
+    <% end %>
+    <% if forum_post.comments.any? %>
+      <p>
+        Hay <%= forum_post.comments.count%> comentario(s) |
+        <%= link_to 'Ver Publicación', forum_thread_forum_post_path(forum_post.forum_thread, forum_post) %>
+      </p>
+    <% else %>
+      <p>
+        No hay comentarios |
+        <%= link_to 'Ver Publicación', forum_thread_forum_post_path(forum_post.forum_thread, forum_post) %>
+      </p>
+    <% end %>
+
+    <p>
+      <%if user_signed_in? %>
+        <% if not current_user.voted_for? forum_post and current_user.id != forum_post.user_id %>
+          <%= link_to "Me gusta", forum_thread_forum_post_likes_path(forum_post.forum_thread, forum_post) %> |
+        
+          <%= link_to "No me gusta", forum_thread_forum_post_dislikes_path(forum_post.forum_thread, forum_post) %> |
+        <%end%>
+        <% if not current_user.follows?(forum_post) %>
+            <%= link_to "Anadir a favoritos", forum_thread_forum_post_favoritos_path(forum_post.forum_thread, forum_post) %>
+        <% end %>
+      <%end%>
+    </p>
+  <% end %>
+  </div>
+<% @forum_thread.polls.each do |poll| %>
+  <div style="border-bottom: 1px solid black; background-color:#0000;">
+  <h3><%= poll.question %></h3>
+  <% poll.answers.each do |a| %>
+    <p><%= a.content %> | <%= link_to 'Votar', '#' %></p>
+  <% end %>
+
+
+  <p>Current results:</p>
+
+
+<% end %>
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>

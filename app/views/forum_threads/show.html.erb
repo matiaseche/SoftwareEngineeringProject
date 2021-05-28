@@ -1,0 +1,7 @@
+<p id="notice"><%= notice %></p>
+
+<h1><%= @forum_thread.subject %></h1>
+
+<%= link_to 'Ver Publicaciones', forum_thread_forum_posts_path(@forum_thread) %> |
+
+<%= link_to 'Volver Atrás', forum_threads_path %>

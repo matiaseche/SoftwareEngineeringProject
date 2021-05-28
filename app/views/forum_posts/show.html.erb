@@ -1,0 +1,79 @@
+<% if ya_postulo(current_user.id, @forum_thread.id) %>
+  <% request = Request.all.where(user_id: current_user.id, forum_thread_id: @forum_thread.id).last %>
+  <% if request.state == "Aceptado" %>
+    <strong><p>Felicitaciones, eres moderador !</p></strong>
+    <% modera = true %>
+  <% end %>
+<% end %>
+<div style="border-bottom: 1px solid black; background-color:#0000;">
+
+  <h3><%= @forum_post.title %></h3>
+  <small>Creado por <strong><%= @forum_post.user.username %>. </strong>
+  <%= @forum_post.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>. 
+  <% if @forum_post.created_at != @forum_post.updated_at %>
+    <strong>(Update <%= time_ago_in_words(@forum_post.updated_at) %> ago)</strong>
+  <% end %>
+  </small>
+
+    <br>
+    <p>
+      <%= @forum_post.body.html_safe %>
+    </p>
+      <% if can? :update, @forum_post %>
+        <%= link_to 'Editar', [:edit, @forum_thread, @forum_post] %>
+      <% end %>
+      <% if (can? :destroy, @forum_post) or modera %>
+        <%= link_to 'Eliminar', forum_thread_forum_post_path(@forum_post.forum_thread, @forum_post), method: :delete, data: { confirm: '¿Estás seguro?' } %>
+      <% end %>
+  
+  <% if @forum_post.comments.any? %>
+    <h4>Comentarios</h4>
+    <%= render @forum_post.comments %>
+  <% end %>
+
+  <hr>
+
+  <% if user_signed_in? %>
+    <% if current_user.follows?(@forum_thread) or current_user.id == @forum_thread.user_id %> 
+      <p>Añadir Comentario</p>
+      <%= form_for([@forum_thread, @forum_post, @forum_post.comments.build]) do |f| %>
+        <%= f.text_area :content %>
+        <%= f.hidden_field :@forum_post, value: 5 %>
+        <br>
+        <br>
+        <a class="waves-effect waves-light btn light-blue darken-2">
+        <%= f.submit %>
+        </a>
+        <br>
+      <% end %>
+
+    <% else %>
+    <div style="border: 1px solid black; background-color: lightgray;">
+      <p>
+        Para poder comentar y poner likes debes seguir el foro!
+      </p>
+    </div>
+
+    <% end %>
+
+  <% else %>
+    <div style="border: 1px solid black; background-color: lightgray;">
+      <p>
+        Inicia sesion o registrate para participar!
+      </p>
+    </div>
+
+  <% end %>
+</div>
+
+<%= link_to 'Volver Atrás', forum_thread_forum_posts_path %>
+<% if user_signed_in? and current_user.follows?(@forum_post) %>
+  <div>
+  <%= link_to 'Volver a Mis publicaciones favoritas', mis_publicaciones_path(current_user) %>
+  </div>
+<%end%>
+
+<div>
+<%= link_to 'Volver a las publicaciones del foro', forum_thread_forum_posts_path %>
+</div>
+

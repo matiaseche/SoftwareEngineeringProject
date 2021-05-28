@@ -1,0 +1,16 @@
+<h1> Estadísticas </h1>
+
+<h4>Usuarios nuevos registrados por dia</h4>
+<%= line_chart User.group_by_day(:created_at).count %>
+
+<h4>Cantidad de publicaciones por foro</h4>
+<%= bar_chart @forum_threads.map { |forum_thread|
+	{name: forum_thread.subject,
+		data: forum_thread.forum_posts.group(:forum_thread_id).count}} %>
+
+
+<h4>Publicaciones por foro por fecha</h4>
+<%= line_chart @forum_threads.map { |forum_thread|
+  {name: forum_thread.subject,
+		data: forum_thread.forum_posts.group_by_day(:created_at).count}
+} %>

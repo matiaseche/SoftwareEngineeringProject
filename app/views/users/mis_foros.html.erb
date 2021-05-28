@@ -1,0 +1,35 @@
+<h3>Mis Foros</h3>
+
+
+<% if @user.followees(ForumThread).any? %>
+  <ul>
+    <% @user.followees(ForumThread).each do |forum_thread| %>
+      <div class="row">
+        <p>
+          <%= link_to forum_thread.subject, forum_thread %>
+          <% if can? :destroy, forum_thread %>
+            <td><%= link_to 'Eliminar', forum_thread, method: :delete, data: { confirm: '¿Estás seguro?' } %></td>
+          <% end %>
+
+          <small>
+            Creado por <strong><%= forum_thread.user.username %></strong>. <%= forum_thread.created_at.strftime('%a, %d %b %Y %H:%M:%S') %>
+          </small>
+          &emsp;<strong>Publicaciones: <%= forum_thread.forum_posts.count %></strong> 
+
+          <div>
+            <% if user_signed_in? %>
+              <% if current_user.follows?(forum_thread) %>
+                  <%= link_to 'Dejar de seguir', unfollows_path(forum_thread) %>
+              <% end %>
+            <%end%>
+          </div>
+        </p>
+      </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>
+    No sigues ningun foro.
+  </p>
+<% end %>

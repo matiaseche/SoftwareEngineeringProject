@@ -1,0 +1,5 @@
+<h1>Nueva Publicación</h1>
+
+<%= render 'form', forum_post: @forum_post %>
+
+<%= link_to 'Volver Atrás', forum_threads_path(@forum_post.forum_thread) %>

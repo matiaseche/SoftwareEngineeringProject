@@ -1,0 +1,45 @@
+
+<html>
+  <head>
+    <title> Grupo 19 - IIC2143 </title>
+    <%= csrf_meta_tags %>
+    <%= stylesheet_link_tag    'application', media: 'all',
+                                              'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag Ckeditor.cdn_url %>
+    <%= javascript_include_tag 'https://www.gstatic.com/charts/loader.js'%>
+
+
+  </head>
+  <body>
+    <header class="navbar navbar-fixed-top navbar-inverse">
+      <div class="container">
+        <nav class="light-blue darken-4">
+          <ul class="left hide-on-med-and-down">
+            <li><%= link_to "Todos los foros", forum_threads_url, id: "logo" %></li>
+            <% if user_signed_in? %>
+              <li><%= link_to "Mis foros", mis_foros_path(current_user), id: "logo" %></li>
+              <li><%= link_to "Mis Publicaciones Favoritas", mis_publicaciones_path(current_user), id: "logo" %></li>
+            <% end %>
+          </ul>
+          <ul class="right hide-on-med-and-down">
+            <% if user_signed_in? %>
+              <li><%= image_tag current_user.avatar.url(:thumb), class: 'round-image-50' %></li>
+              <li><%= link_to current_user.username, user_path(current_user), :class => 'navbar-link' %></li>
+              <li><%= link_to "Cerrar Sesión", destroy_user_session_path, method: :delete, :class => 'navbar-link' %></li>
+            <% else %>
+              <li><%= link_to "Iniciar con Facebook", user_facebook_omniauth_authorize_path %></li>
+              <li><%= link_to "Iniciar Sesión", new_user_session_path %></li>
+              <li><%= link_to "Registrarte", new_user_registration_path %></li>
+            <% end %>
+          </ul>
+       </nav>
+      </div>
+
+
+    </header>
+    <div class="container">
+      <%= yield %>
+    </div>
+  </body>
+</html>
